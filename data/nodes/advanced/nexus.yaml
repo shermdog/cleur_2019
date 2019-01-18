@@ -1,0 +1,76 @@
+profile::advanced::vlans:
+  defaults:
+    ensure             : 'present'
+    shutdown           : 'false'
+    ipv4_redirects     : 'false'
+    ipv6_redirects     : 'false'
+    hsrp_version       : 1
+    hsrp_group:
+      ipv4_enable          : 'true'
+      preempt              : 'true'
+      preempt_delay_minimum: 30
+      preempt_delay_reload : 60
+      priority             : 254
+      timers_hello         : 2
+      timers_hold          : 7
+  vlans:
+    '3':
+      description        : 'Backend'
+      ipv4_acl_in        : 'backend'
+      ipv4_address       : '10.223.152.35'
+      ipv4_netmask_length: 27
+      hsrp_group:
+        ipv4_vip         : '10.223.152.33'
+    '4':
+      description        : 'PreProd'
+      shutdown           : 'false'
+      ipv4_acl_in        : 'webserver'
+      ipv4_address       : '10.223.152.93'
+      ipv4_netmask_length: 27
+      hsrp_group:
+        ipv4_vip         : '10.223.152.94'
+    '33':
+      description        : 'Webserver'
+      ipv4_acl_in        : 'webserver'
+      ipv4_address       : '10.223.131.253'
+      ipv4_netmask_length: 24
+      hsrp_group:
+        ipv4_vip         : '10.223.131.254'
+    '634':
+      description        : 'ILO'
+      ipv4_acl_in        : 'ilo'
+      ipv4_address       : '172.20.34.253'
+      ipv4_netmask_length: 24
+      hsrp_group:
+        ipv4_vip         : '172.20.34.254'
+
+
+profile::advanced::acls:
+  defaults:
+    ensure: 'present'
+    proto: 'tcp'
+    log: 'false'
+    action: 'deny'
+    established: 'false'
+
+  acls:
+    'ipv4 ilo':
+      10:  {action: permit, src_addr: '172.20.35.0/24', dst_addr: '172.20.34.0/24', proto: 'ip'}
+      20:  {action: permit, src_addr: '172.20.9.0/24', src_port: 'eq snmptrap', dst_addr: '172.20.34.0/24', proto: 'udp'}
+      100: {action: permit, src_addr: '172.20.9.72/31', src_port: 'eq 1918', dst_addr: '172.20.34.0/24', dst_port: 'gt 1023', established: 'true'}
+      110: {action: permit, src_addr: '172.20.9.72/31', src_port: 'eq 6014', dst_addr: '172.20.34.0/24', dst_port: 'gt 1023', established: 'true'}
+      120: {action: permit, src_addr: '172.20.9.72/31', src_port: 'range 9988 9990', dst_addr: '172.20.34.0/24', dst_port: 'gt 1023', established: 'true'}
+      130: {action: permit, src_addr: '172.20.118.65/32', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'range 7937 8050'}
+      140: {action: permit, src_addr: '172.20.118.66/32', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'range 7937 8050'}
+      150: {action: permit, src_addr: '172.20.118.65/32', src_port: 'range 7937 8050', dst_addr: '172.20.34.0/24', dst_port: 'gt 1023', established: 'true'}
+      160: {action: permit, src_addr: '172.20.118.66/32', src_port: 'range 7937 8050', dst_addr: '172.20.34.0/24', dst_port: 'gt 1023', established: 'true'}
+      170: {action: permit, src_addr: '10.40.40.0/24', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'range 22 telnet'}
+      180: {action: permit, src_addr: '10.40.40.0/24', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'eq www'}
+      190: {action: permit, src_addr: '10.40.40.0/24', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'eq 443'}
+      200: {action: permit, src_addr: '10.40.40.0/24', src_port: 'gt 1023', dst_addr: '172.20.34.0/24', dst_port: 'eq 17988'}
+    'ipv4 backend':
+      10:  {action: permit, src_addr: '10.223.152.32/30', src_port: 'eq 1985', dst_addr: '224.0.0.2/32',dst_port: 'eq 1985', proto: 'udp'}
+      20:  {action: deny,   src_addr: 'any',              src_port: 'eq 1985', dst_addr: '224.0.0.2/32',dst_port: 'eq 1985', proto: 'udp'}
+    'ipv4 webserver':
+      10:  {action: permit, src_addr: '10.223.152.92/3', src_port: 'eq 1985', dst_addr: '224.0.0.2/32',dst_port: 'eq 1985', proto: 'udp'}
+      20:  {action: deny, src_addr: 'any', src_port: 'eq 1985', dst_addr: '224.0.0.2/32',dst_port: 'eq 1985', proto: 'udp'}

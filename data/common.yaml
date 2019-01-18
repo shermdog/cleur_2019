@@ -1,0 +1,39 @@
+---
+message: "This node is using common data"
+
+# These options manage default merge behavior. Can be overridden via hierarchy
+# https://puppet.com/docs/puppet/5.5/hiera_merging.html#setting-the-merge-behavior-for-a-lookup
+lookup_options:
+  profile::ntp_server::servers:
+    merge:
+      strategy: deep
+      merge_hash_arrays: true
+
+# Purge unmanaged resources by default
+profile::ntp_server::purge: true
+profile::syslog_server::purge: true
+
+# Noop resources
+profile::syslog_server::noop: true
+
+# Default MOTD
+profile::banner::motd: "Managed by Puppet - common.yaml\n"
+
+# Default domain name
+profile::network_dns::domain: 'puppet.com'
+
+# Default NTP Servers
+profile::ntp_server::servers:
+  132.163.96.5:
+    prefer: true
+    ensure: present
+  132.163.97.5:
+    prefer: false
+    ensure: present
+
+# Default Syslog Servers
+profile::syslog_server::servers:
+  192.168.11.1:
+    ensure: present
+  192.168.22.2:
+    ensure: present

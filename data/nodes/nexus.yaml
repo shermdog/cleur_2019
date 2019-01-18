@@ -1,0 +1,24 @@
+---
+# NTP Servers - merge with common
+profile::ntp_server::servers:
+  132.163.96.5:
+    vrf: management
+    minpoll: 5
+    maxpoll: 15
+  132.163.97.5:
+    vrf: management
+    minpoll: 5
+    maxpoll: 15
+  129.6.15.28:
+    prefer: false
+    ensure: present
+  129.6.15.29:
+    prefer: false
+    ensure: present
+
+# Syslog Servers - override common
+profile::syslog_server::servers:
+  192.168.33.3:
+    ensure: present
+  192.168.44.4:
+    ensure: present

@@ -1,0 +1,15 @@
+---
+device_manager::devices:
+  ios:
+    type:         'cisco_ios'
+    credentials:
+      address:    '192.168.122.254'
+      username:        'admin'
+      password:        'admin'
+      enable_password: 'admin'
+  nexus:
+    type:         'cisco_nexus'
+    credentials:
+      address:    '192.168.122.154'
+      username:        'admin'
+      password:        'admin'
